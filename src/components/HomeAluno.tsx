@@ -4,7 +4,7 @@ import { Home, Dumbbell, User, LogOut, ChevronRight, PlayCircle, Timer, Bell } f
 import ProfileTab from './ProfileTab';
 import TreinosTab from './TreinosTab';
 import AlarmesTab from './AlarmesTab';
-import CronometroTimer from './CronometroTimer';
+import { CronometroTimer } from './CronometroTimer';
 
 export default function HomeAluno({ session }: { session: any }) {
   const [nome, setNome] = useState('');
@@ -268,7 +268,19 @@ export default function HomeAluno({ session }: { session: any }) {
         )}
       </main>
 
-      <CronometroTimer isOpen={cronometroOpen} onClose={() => setCronometroOpen(false)} />
+      {cronometroOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="relative">
+            <button 
+              onClick={() => setCronometroOpen(false)}
+              className="absolute -top-10 right-0 text-gray-400 hover:text-white"
+            >
+              Fechar
+            </button>
+            <CronometroTimer />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

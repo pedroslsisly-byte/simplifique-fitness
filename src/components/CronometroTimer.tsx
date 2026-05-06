@@ -1,160 +1,112 @@
-import { useState, useEffect, useRef } from 'react';
-import { Play, Pause, RotateCcw, Plus, Minus, X } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Play, Pause, RotateCcw } from 'lucide-react';
 
-interface CronometroTimerProps {
-  isOpen: boolean;
-  onClose: () => void;
-  duracao?: string;
-}
-
-const PRESETS = [
-  { label: '30s', value: 30 },
-  { label: '1 min', value: 60 },
-  { label: '90s', value: 90 },
-  { label: '2 min', value: 120 },
-  { label: '3 min', value: 180 },
-];
-
-export default function CronometroTimer({ isOpen, onClose, duracao }: CronometroTimerProps) {
-  const [segundos, setSegundos] = useState(duracao ? parseInt(duracao) * 60 : 60);
-  const [isAtivo, setIsAtivo] = useState(false);
-  const [tempoPersonalizado, setTempoPersonalizado] = useState('');
+export const CronometroTimer = () => {
+  const [timeLeft, setTimeLeft] = useState<number>(60);
+  const [isActive, setIsActive] = useState<boolean>(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (isAtivo && segundos > 0) {
+    if (isActive && timeLeft > 0) {
       intervalRef.current = setInterval(() => {
-        setSegundos(prev => {
-          if (prev <= 1) {
-            setIsAtivo(false);
-            new Audio('/notification.mp3').play().catch(() => {});
-            return 0;
-          }
-          return prev - 1;
-        });
+        setTimeLeft((prev) => prev - 1);
       }, 1000);
-    } else {
-      if (intervalRef.current) clearInterval(intervalRef.current);
     }
+
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [isAtivo, segundos]);
+  }, [isActive]);
 
-  const formatarTempo = (totalSegundos: number) => {
-    const mins = Math.floor(totalSegundos / 60);
-    const segs = totalSegundos % 60;
-    return `${mins.toString().padStart(2, '0')}:${segs.toString().padStart(2, '0')}`;
+  useEffect(() => {
+    if (timeLeft === 0) setIsActive(false);
+  }, [timeLeft]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs
+      .toString()
+      .padStart(2, '0')}`;
   };
 
-  const adicionarTempo = (valor: number) => {
-    setSegundos(prev => prev + valor);
+  const toggleTimer = () => setIsActive((prev) => !prev);
+
+  const resetTimer = () => {
+    setIsActive(false);
+    setTimeLeft(60);
   };
 
-  const aplicarTempoPersonalizado = () => {
-    const tempo = parseInt(tempoPersonalizado);
-    if (tempo > 0 && tempo <= 3600) {
-      setSegundos(tempo * 60);
-      setTempoPersonalizado('');
-    }
+  const setPreset = (seconds: number) => {
+    setIsActive(false);
+    setTimeLeft(seconds);
   };
 
-  const resetar = () => {
-    setIsAtivo(false);
-    setSegundos(duracao ? parseInt(duracao) * 60 : 60);
+  const adjustTime = (amount: number) => {
+    setTimeLeft((prev) => Math.max(0, prev + amount));
   };
-
-  if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-      <div className="bg-[#0a0a0a] border border-white/10 rounded-3xl w-full max-w-md p-8 relative">
-        <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-white">
-          <X className="w-6 h-6" />
+    <div className="w-[320px] p-6 rounded-3xl bg-[#0a0a0a] border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.6)] flex flex-col items-center gap-6">
+
+      {/* Título */}
+      <span className="text-xs tracking-widest text-gray-500 uppercase">
+        Cronômetro
+      </span>
+
+      {/* Display */}
+      <div className="text-6xl font-mono font-semibold text-[#39FF14] tracking-wider drop-shadow-[0_0_10px_rgba(57,255,20,0.25)]">
+        {formatTime(timeLeft)}
+      </div>
+
+      {/* Controles */}
+      <div className="flex items-center gap-5">
+        <button
+          onClick={toggleTimer}
+          className="w-16 h-16 rounded-full border border-[#39FF14]/40 flex items-center justify-center text-[#39FF14] hover:bg-[#39FF14] hover:text-black transition-all duration-300 shadow-[0_0_10px_rgba(57,255,20,0.2)]"
+        >
+          {isActive ? <Pause size={26} /> : <Play size={26} fill="currentColor" />}
         </button>
 
-        <h2 className="text-2xl font-black italic uppercase tracking-tight text-center mb-8">
-          Cronômetro
-        </h2>
+        <button
+          onClick={resetTimer}
+          className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:border-white/30 transition-all"
+        >
+          <RotateCcw size={20} />
+        </button>
+      </div>
 
-        <div className="text-center mb-8">
-          <div className="text-7xl font-black tabular-nums tracking-tighter mb-4">
-            <span className={segundos === 0 ? 'text-red-500' : 'text-[#39FF14]'}>
-              {formatarTempo(segundos)}
-            </span>
-          </div>
-          {segundos === 0 && (
-            <p className="text-red-500 font-bold uppercase tracking-widest animate-pulse">
-              Tempo esgotado!
-            </p>
-          )}
-        </div>
-
-        <div className="flex justify-center gap-4 mb-8">
+      {/* Presets */}
+      <div className="flex gap-2 flex-wrap justify-center">
+        {[30, 60, 90, 120].map((sec) => (
           <button
-            onClick={() => setIsAtivo(!isAtivo)}
-            className={`w-20 h-20 rounded-full flex items-center justify-center transition-all ${
-              isAtivo 
-                ? 'bg-yellow-500/20 text-yellow-500 border-2 border-yellow-500' 
-                : 'bg-[#39FF14]/20 text-[#39FF14] border-2 border-[#39FF14]'
-            }`}
+            key={sec}
+            onClick={() => setPreset(sec)}
+            className="px-3 py-1.5 rounded-md text-xs font-medium bg-white/5 border border-white/10 text-gray-400 hover:text-[#39FF14] hover:border-[#39FF14]/50 transition-all"
           >
-            {isAtivo ? <Pause className="w-10 h-10" /> : <Play className="w-10 h-10 ml-1" />}
+            {sec < 60 ? `${sec}s` : `${sec / 60} min`}
           </button>
-          <button
-            onClick={resetar}
-            className="w-20 h-20 rounded-full bg-white/5 text-gray-400 border-2 border-white/10 flex items-center justify-center hover:bg-white/10 hover:text-white transition-all"
-          >
-            <RotateCcw className="w-8 h-8" />
-          </button>
-        </div>
+        ))}
+      </div>
 
-        <div className="space-y-4">
-          <div className="flex justify-center gap-2 flex-wrap">
-            {PRESETS.map(preset => (
-              <button
-                key={preset.value}
-                onClick={() => setSegundos(preset.value)}
-                className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm font-bold uppercase tracking-widest hover:bg-white/10 hover:border-white/20 transition-all"
-              >
-                {preset.label}
-              </button>
-            ))}
-          </div>
+      {/* Ajuste fino */}
+      <div className="flex items-center gap-4 text-sm">
+        <button
+          onClick={() => adjustTime(-15)}
+          className="text-gray-500 hover:text-white transition"
+        >
+          -15s
+        </button>
 
-          <div className="flex gap-2 items-center">
-            <input
-              type="number"
-              value={tempoPersonalizado}
-              onChange={e => setTempoPersonalizado(e.target.value)}
-              placeholder="Minutos"
-              className="flex-1 bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#39FF14]"
-            />
-            <button
-              onClick={aplicarTempoPersonalizado}
-              className="px-4 py-3 bg-[#39FF14]/10 border border-[#39FF14]/20 text-[#39FF14] rounded-xl font-bold uppercase tracking-widest hover:bg-[#39FF14]/20"
-            >
-              Definir
-            </button>
-          </div>
+        <div className="h-4 w-px bg-white/10"></div>
 
-          <div className="flex justify-center gap-4 mt-4">
-            <button
-              onClick={() => adicionarTempo(-15)}
-              disabled={segundos <= 15}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm font-bold uppercase hover:bg-white/10 disabled:opacity-50"
-            >
-              <Minus className="w-4 h-4" /> 15s
-            </button>
-            <button
-              onClick={() => adicionarTempo(15)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm font-bold uppercase hover:bg-white/10"
-            >
-              <Plus className="w-4 h-4" /> 15s
-            </button>
-          </div>
-        </div>
+        <button
+          onClick={() => adjustTime(15)}
+          className="text-gray-500 hover:text-white transition"
+        >
+          +15s
+        </button>
       </div>
     </div>
   );
-}
+};
