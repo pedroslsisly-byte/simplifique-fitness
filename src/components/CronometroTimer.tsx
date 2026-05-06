@@ -89,16 +89,24 @@ export const CronometroTimer = () => {
     setInputSeconds(num.toString().padStart(2, '0'));
   };
 
+  const setPreset = (min: number, sec: number = 0) => {
+    setIsActive(false);
+    setMinutes(min);
+    setSeconds(sec);
+    setInputMinutes(min.toString().padStart(2, '0'));
+    setInputSeconds(sec.toString().padStart(2, '0'));
+  };
+
   const format = (num: number) => num.toString().padStart(2, '0');
 
   return (
-    <div className="w-[360px] p-8 rounded-[2.5rem] bg-[#0a0a0a] border border-white/10 shadow-2xl flex flex-col items-center gap-8">
+    <div className="w-[380px] p-8 rounded-[2.5rem] bg-[#0a0a0a] border border-white/10 shadow-2xl flex flex-col items-center gap-8">
 
       <span className="text-xs font-black text-gray-500 uppercase tracking-[0.3em]">
         Cronômetro
       </span>
 
-      {/* DISPLAY COM SETAS GRANDES + INPUT MANUAL */}
+      {/* DISPLAY COM SETAS + INPUT MANUAL */}
       <div className="flex items-center gap-6">
         {/* MINUTOS */}
         <div className="flex flex-col items-center gap-3">
@@ -181,6 +189,11 @@ export const CronometroTimer = () => {
         </div>
       </div>
 
+      {/* INSTRUÇÃO */}
+      <p className="text-xs text-gray-500 text-center">
+        ↑↓ Use as setas ou clique no número para digitar
+      </p>
+
       {/* CONTROLES */}
       <div className="flex items-center gap-6 pt-2">
         <button
@@ -198,23 +211,20 @@ export const CronometroTimer = () => {
         </button>
       </div>
 
-      {/* PRESETS */}
-      <div className="flex gap-4">
-        {[30, 60, 90, 120].map((sec) => (
-          <button
-            key={sec}
-            onClick={() => {
-              setIsActive(false);
-              setMinutes(Math.floor(sec / 60));
-              setSeconds(sec % 60);
-              setInputMinutes(Math.floor(sec / 60).toString().padStart(2, '0'));
-              setInputSeconds((sec % 60).toString().padStart(2, '0'));
-            }}
-            className="px-5 py-3 rounded-xl text-sm font-bold bg-white/5 border border-white/10 text-gray-400 hover:text-[#39FF14] hover:border-[#39FF14]/50 transition-all"
-          >
-            {sec < 60 ? `${sec}s` : `${sec/60}min`}
-          </button>
-        ))}
+      {/* PRESETS DE MINUTOS */}
+      <div className="w-full">
+        <p className="text-xs text-gray-500 text-center mb-3">Selecione um tempo</p>
+        <div className="flex flex-wrap gap-2 justify-center">
+          {[5, 10, 15, 20, 25, 30, 45, 60].map((min) => (
+            <button
+              key={min}
+              onClick={() => setPreset(min)}
+              className="px-4 py-2 rounded-xl text-sm font-bold bg-white/5 border border-white/10 text-gray-400 hover:text-[#39FF14] hover:border-[#39FF14]/50 transition-all"
+            >
+              {min}min
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
