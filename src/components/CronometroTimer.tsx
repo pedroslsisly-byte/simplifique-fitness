@@ -1,110 +1,76 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, RotateCcw } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Play, Pause, RotateCcw, ChevronUp, ChevronDown } from 'lucide-react';
 
 export const CronometroTimer = () => {
-  const [timeLeft, setTimeLeft] = useState<number>(60);
-  const [isActive, setIsActive] = useState<boolean>(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [timeLeft, setTimeLeft] = useState(60);
+  const [isActive, setIsActive] = useState(false);
 
   useEffect(() => {
+    let interval: any = null;
     if (isActive && timeLeft > 0) {
-      intervalRef.current = setInterval(() => {
+      interval = setInterval(() => {
         setTimeLeft((prev) => prev - 1);
       }, 1000);
+    } else {
+      clearInterval(interval);
     }
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [isActive]);
-
-  useEffect(() => {
-    if (timeLeft === 0) setIsActive(false);
-  }, [timeLeft]);
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs
-      .toString()
-      .padStart(2, '0')}`;
-  };
-
-  const toggleTimer = () => setIsActive((prev) => !prev);
-
-  const resetTimer = () => {
-    setIsActive(false);
-    setTimeLeft(60);
-  };
-
-  const setPreset = (seconds: number) => {
-    setIsActive(false);
-    setTimeLeft(seconds);
-  };
+    return () => clearInterval(interval);
+  }, [isActive, timeLeft]);
 
   const adjustTime = (amount: number) => {
-    setTimeLeft((prev) => Math.max(0, prev + amount));
+    if (!isActive) {
+      setTimeLeft((prev) => Math.max(0, prev + amount));
+    }
   };
 
+  const formatParts = (totalSeconds: number) => {
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return {
+      mins: mins.toString().padStart(2, '0'),
+      secs: secs.toString().padStart(2, '0')
+    };
+  };
+
+  const time = formatParts(timeLeft);
+
   return (
-    <div className="w-[320px] p-6 rounded-3xl bg-[#0a0a0a] border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.6)] flex flex-col items-center gap-6">
+    <div className="flex flex-col items-center space-y-6 p-8 bg-[#0a0a0a] rounded-[2.5rem] border border-white/5 shadow-2xl">
+      <h2 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em]">Cronômetro</h2>
 
-      {/* Título */}
-      <span className="text-xs tracking-widest text-gray-500 uppercase">
-        Cronômetro
-      </span>
+      {/* Interface de Ajuste com Setas */}
+      <div className="flex items-center gap-4">
+        {/* Minutos */}
+        <div className="flex flex-col items-center">
+          <button onClick={() => adjustTime(60)} className="text-gray-600 hover:text-[#39FF14] transition-colors"><ChevronUp size={32} /></button>
+          <div className="text-7xl font-mono font-bold text-[#39FF14] drop-shadow-[0_0_15px_rgba(57,255,20,0.3)]">{time.mins}</div>
+          <button onClick={() => adjustTime(-60)} className="text-gray-600 hover:text-[#39FF14] transition-colors"><ChevronDown size={32} /></button>
+        </div>
 
-      {/* Display */}
-      <div className="text-6xl font-mono font-semibold text-[#39FF14] tracking-wider drop-shadow-[0_0_10px_rgba(57,255,20,0.25)]">
-        {formatTime(timeLeft)}
+        <div className="text-5xl font-mono font-bold text-[#39FF14] pt-4">:</div>
+
+        {/* Segundos */}
+        <div className="flex flex-col items-center">
+          <button onClick={() => adjustTime(1)} className="text-gray-600 hover:text-[#39FF14] transition-colors"><ChevronUp size={32} /></button>
+          <div className="text-7xl font-mono font-bold text-[#39FF14] drop-shadow-[0_0_15px_rgba(57,255,20,0.3)]">{time.secs}</div>
+          <button onClick={() => adjustTime(-1)} className="text-gray-600 hover:text-[#39FF14] transition-colors"><ChevronDown size={32} /></button>
+        </div>
       </div>
 
-      {/* Controles */}
-      <div className="flex items-center gap-5">
+      {/* Botões de Ação */}
+      <div className="flex items-center gap-6 pt-4">
         <button
-          onClick={toggleTimer}
-          className="w-16 h-16 rounded-full border border-[#39FF14]/40 flex items-center justify-center text-[#39FF14] hover:bg-[#39FF14] hover:text-black transition-all duration-300 shadow-[0_0_10px_rgba(57,255,20,0.2)]"
+          onClick={() => setIsActive(!isActive)}
+          className="w-20 h-20 rounded-full border-2 border-[#39FF14] flex items-center justify-center text-[#39FF14] hover:bg-[#39FF14] hover:text-black transition-all"
         >
-          {isActive ? <Pause size={26} /> : <Play size={26} fill="currentColor" />}
+          {isActive ? <Pause size={32} /> : <Play size={32} fill="currentColor" />}
         </button>
 
         <button
-          onClick={resetTimer}
-          className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:border-white/30 transition-all"
+          onClick={() => { setIsActive(false); setTimeLeft(60); }}
+          className="w-14 h-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white"
         >
-          <RotateCcw size={20} />
-        </button>
-      </div>
-
-      {/* Presets */}
-      <div className="flex gap-2 flex-wrap justify-center">
-        {[30, 60, 90, 120].map((sec) => (
-          <button
-            key={sec}
-            onClick={() => setPreset(sec)}
-            className="px-3 py-1.5 rounded-md text-xs font-medium bg-white/5 border border-white/10 text-gray-400 hover:text-[#39FF14] hover:border-[#39FF14]/50 transition-all"
-          >
-            {sec < 60 ? `${sec}s` : `${sec / 60} min`}
-          </button>
-        ))}
-      </div>
-
-      {/* Ajuste fino */}
-      <div className="flex items-center gap-4 text-sm">
-        <button
-          onClick={() => adjustTime(-15)}
-          className="text-gray-500 hover:text-white transition"
-        >
-          -15s
-        </button>
-
-        <div className="h-4 w-px bg-white/10"></div>
-
-        <button
-          onClick={() => adjustTime(15)}
-          className="text-gray-500 hover:text-white transition"
-        >
-          +15s
+          <RotateCcw size={24} />
         </button>
       </div>
     </div>
