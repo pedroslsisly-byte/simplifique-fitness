@@ -237,29 +237,31 @@ export default function HomeAluno({ session }: { session: any }) {
               </div>
             </section>
 
-            {/* Lista da tabela 'treinos' do Supabase */}
+{/* Lista de exercícios do treino selecionado ou todos os treinos */}
             <section className="mt-4 flex flex-col gap-6">
               <div className="flex justify-between items-end">
-                <h3 className="text-XL font-black italic uppercase tracking-widest text-[#39FF14] neon-border pl-3">Meus Treinos</h3>
-                <span className="text-xs text-gray-500 uppercase font-bold tracking-widest cursor-pointer hover:text-white transition-colors">Ver todos</span>
+                <h3 className="text-XL font-black italic uppercase tracking-widest text-[#39FF14] neon-border pl-3">
+                  {treinoAtual ? 'EXERCÍCIOS' : 'MEUS TREINOS'}
+                </h3>
+                <span 
+                  onClick={() => treinoAtual && setTreinoAtual(null)}
+                  className="text-xs text-gray-500 uppercase font-bold tracking-widest cursor-pointer hover:text-white transition-colors"
+                >
+                  {treinoAtual ? 'Ver todos' : 'Ver todos'}
+                </span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {treinos.length === 0 ? (
-                  <div className="col-span-full py-12 glass rounded-2xl flex flex-col justify-center items-center text-center">
-                    <Dumbbell className="w-12 h-12 text-gray-700 mb-4" />
-                    <h4 className="text-lg font-bold text-gray-400 uppercase tracking-widest mb-1">Nenhum treino disponível</h4>
-                    <p className="text-sm text-gray-600">A tabela 'treinos' está vazia ou não está configurada corretamente.</p>
-                  </div>
-                ) : (
-                  treinos.map((treino, index) => (
-                    <div key={treino.id || index} onClick={() => handleSetTreino(treino)} className="glass p-6 rounded-2xl flex justify-between items-center hover:bg-white/5 transition-colors cursor-pointer group">
+                {treinoAtual && treinoAtual.exercicios ? (
+                  treinoAtual.exercicios.map((exercicio: any, index: number) => (
+                    <div key={index} className="glass p-6 rounded-2xl flex justify-between items-center hover:bg-white/5 transition-colors cursor-pointer group">
                       <div className="flex flex-col gap-1">
                         <h4 className="text-lg font-bold text-white uppercase tracking-tight">
-                          {treino.nome || treino.titulo || treino.title || treino.name || `Treino ${index + 1}`}
+                          {exercicio.nome || exercicio.name || exercicio.titulo || `Exercício ${index + 1}`}
                         </h4>
                         <p className="text-sm text-gray-500 line-clamp-1">
-                          {treino.descricao || treino.description || "Descrição não informada."}
+                          {exercicio.series ? `${exercicio.series} séries` : '3 séries'} × {exercicio.repeticoes || exercicio.reps || '10-12'} repetições
+                          {exercicio.descanso ? ` • ${exercicio.descanso}s descanso` : ''}
                         </p>
                       </div>
                       <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-[#39FF14] group-hover:bg-[#39FF14] group-hover:text-black transition-colors">
@@ -267,6 +269,36 @@ export default function HomeAluno({ session }: { session: any }) {
                       </div>
                     </div>
                   ))
+                ) : treinos.length === 0 ? (
+                  <div className="col-span-full py-12 glass rounded-2xl flex flex-col justify-center items-center text-center">
+                    <Dumbbell className="w-12 h-12 text-gray-700 mb-4" />
+                    <h4 className="text-lg font-bold text-gray-400 uppercase tracking-widest mb-1">Nenhum treino disponível</h4>
+                    <p className="text-sm text-gray-600">A tabela 'treinos' está vazia ou não está configurada corretamente.</p>
+                  </div>
+                ) : (
+                  treinoAtual ? (
+                    <div className="col-span-full py-12 glass rounded-2xl flex flex-col justify-center items-center text-center">
+                      <Timer className="w-12 h-12 text-gray-700 mb-4" />
+                      <h4 className="text-lg font-bold text-gray-400 uppercase tracking-widest mb-1">Nenhum exercício cadastrado</h4>
+                      <p className="text-sm text-gray-600">Este treino não possui exercícios ainda.</p>
+                    </div>
+                  ) : (
+                    treinos.map((treino, index) => (
+                      <div key={treino.id || index} onClick={() => handleSetTreino(treino)} className="glass p-6 rounded-2xl flex justify-between items-center hover:bg-white/5 transition-colors cursor-pointer group">
+                        <div className="flex flex-col gap-1">
+                          <h4 className="text-lg font-bold text-white uppercase tracking-tight">
+                            {treino.nome || treino.titulo || treino.title || treino.name || `Treino ${index + 1}`}
+                          </h4>
+                          <p className="text-sm text-gray-500 line-clamp-1">
+                            {treino.descricao || treino.description || "Descrição não informada."}
+                          </p>
+                        </div>
+                        <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-[#39FF14] group-hover:bg-[#39FF14] group-hover:text-black transition-colors">
+                          <ChevronRight className="w-5 h-5" />
+                        </div>
+                      </div>
+                    ))
+                  )
                 )}
               </div>
             </section>
