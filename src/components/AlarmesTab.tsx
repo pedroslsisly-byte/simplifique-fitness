@@ -102,3 +102,5 @@ export const CronometroTimer = () => {
     </div>
   );
 };
+
+export default CronometroTimer;
