@@ -8,6 +8,8 @@ interface Alarme {
   nome: string;
   horario: string;
   ativo: boolean;
+  diasSemana: number[];
+  som: string;
 }
 
 const TIPOS_ALARME = [
@@ -27,7 +29,13 @@ const PRESETS = [
 export default function AlarmesTab() {
   const [alarmes, setAlarmes] = useState<Alarme[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [novoAlarme, setNovoAlarme] = useState({ tipo: 'agua' as const, nome: '', horario: '08:00' });
+  const [novoAlarme, setNovoAlarme] = useState({ 
+    tipo: 'agua' as const, 
+    nome: '', 
+    horario: '08:00',
+    diasSemana: [0,1,2,3,4,5,6],
+    som: 'bell'
+  });
 
   useAlarmMonitor(alarmes);
 
@@ -46,6 +54,8 @@ export default function AlarmesTab() {
         nome: p.nome,
         horario: p.horario,
         ativo: true,
+        diasSemana: [0,1,2,3,4,5,6],
+        som: 'bell',
       }));
       setAlarmes(presetsIniciais);
       localStorage.setItem('alarmes', JSON.stringify(presetsIniciais));
@@ -65,10 +75,12 @@ export default function AlarmesTab() {
       nome: novoAlarme.nome,
       horario: novoAlarme.horario,
       ativo: true,
+      diasSemana: novoAlarme.diasSemana,
+      som: novoAlarme.som,
     };
     salvarAlarmes([...alarmes, alarme]);
     setIsModalOpen(false);
-    setNovoAlarme({ tipo: 'agua', nome: '', horario: '08:00' });
+    setNovoAlarme({ tipo: 'agua', nome: '', horario: '08:00', diasSemana: [0,1,2,3,4,5,6], som: 'bell' });
   };
 
   const toggleAlarme = (id: string) => {
@@ -260,6 +272,44 @@ export default function AlarmesTab() {
                   onChange={e => setNovoAlarme({ ...novoAlarme, horario: e.target.value })}
                   className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#39FF14]"
                 />
+              </div>
+
+              <div className="mt-4 space-y-4">
+                <label className="text-xs font-bold text-gray-400 uppercase block">Repetir nos dias</label>
+                <div className="flex justify-between">
+                  {['D','S','T','Q','Q','S','S'].map((dia, index) => (
+                    <button 
+                      key={index}
+                      type="button"
+                      onClick={() => {
+                        const dias = novoAlarme.diasSemana.includes(index)
+                          ? novoAlarme.diasSemana.filter(d => d !== index)
+                          : [...novoAlarme.diasSemana, index];
+                        setNovoAlarme({ ...novoAlarme, diasSemana: dias });
+                      }}
+                      className={`w-8 h-8 rounded-full border text-xs font-bold transition-all ${
+                        novoAlarme.diasSemana.includes(index)
+                          ? 'bg-[#39FF14] border-[#39FF14] text-black'
+                          : 'border-[#39FF14] text-[#39FF14] hover:bg-[#39FF14]/20'
+                      }`}
+                    >
+                      {dia}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-gray-400 uppercase block mt-4">Som do Alarme</label>
+                <select 
+                  value={novoAlarme.som}
+                  onChange={e => setNovoAlarme({ ...novoAlarme, som: e.target.value })}
+                  className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg p-3 text-white outline-none focus:border-[#39FF14]"
+                >
+                  <option value="bell">Sino Padrão</option>
+                  <option value="digital">Digital Premium</option>
+                  <option value="energy">Energia Academia</option>
+                </select>
               </div>
 
               <button

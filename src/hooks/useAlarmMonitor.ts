@@ -6,6 +6,8 @@ interface Alarme {
   nome: string;
   horario: string;
   ativo: boolean;
+  diasSemana: number[];
+  som: string;
 }
 
 export const useAlarmMonitor = (alarms: Alarme[]) => {
@@ -22,15 +24,15 @@ export const useAlarmMonitor = (alarms: Alarme[]) => {
         
         const alarmTime = alarm.horario.substring(0, 5);
         
-        if (alarmTime === currentTime) {
+        if (alarmTime === currentTime && alarm.diasSemana.includes(currentDay)) {
           if (Notification.permission === 'granted') {
             new Notification(`🔔 ${alarm.nome}`, {
-              body: `Hora de ${alarm.tipo}!`,
+              body: `Hora de ${alarm.tipo}! Som: ${alarm.som}`,
               icon: '/icon.png'
             });
           }
           
-          console.log(`🔔 Alarme: ${alarm.nome}`);
+          console.log(`🔔 Alarme: ${alarm.nome} - Som: ${alarm.som}`);
         }
       });
     };
