@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+body { 
+  background-color: #050505; 
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; 
+} 
+
+.bg-mesh { 
+  background: radial-gradient(circle at 20% 30%, #1a1a1a 0%, transparent 50%), 
+              radial-gradient(circle at 80% 70%, #0c1b0c 0%, transparent 50%), 
+              linear-gradient(135deg, #050505 0%, #0a0a0a 100%); 
+} 
+
+.glass { 
+  background: rgba(255, 255, 255, 0.03); 
+  backdrop-filter: blur(12px); 
+  border: 1px solid rgba(255, 255, 255, 0.08); 
+} 
+
+.neon-border { 
+  border-left: 4px solid #39FF14; 
+} 
+
+.input-focus:focus-within { 
+  outline: none; 
+  border-color: #39FF14; 
+  box-shadow: 0 0 10px rgba(57, 255, 20, 0.2); 
+}
