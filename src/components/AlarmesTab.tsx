@@ -136,6 +136,19 @@ export default function AlarmesTab() {
     }
   };
 
+  const testarAlarme = () => {
+    if (alarmes.length > 0) {
+      const alarm = alarmes[0];
+      const audio = new Audio('https://www.soundjay.com/buttons/sounds/beep-01a.mp3');
+      audio.volume = 1;
+      audio.play().then(() => {
+        alert(`🔔 Testando alarme: ${alarm.nome}\nSom: ${alarm.som}`);
+      }).catch(() => {
+        alert('Erro ao reproduzir som. Verifique as permissões do navegador.');
+      });
+    }
+  };
+
   return (
     <div className="flex flex-col gap-8 pb-10 w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
       <section className="flex flex-col gap-2">
@@ -147,9 +160,21 @@ export default function AlarmesTab() {
         </p>
       </section>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-3">
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={testarAlarme}
+          className="flex items-center gap-2 bg-yellow-500 text-black font-black uppercase tracking-widest px-4 py-3 rounded-xl hover:bg-yellow-400 transition-all"
+        >
+          <Bell className="w-5 h-5" />
+          Testar Som
+        </button>
+        <button
+          onClick={() => {
+            if (Notification.permission !== 'granted') {
+              Notification.requestPermission();
+            }
+            setIsModalOpen(true);
+          }}
           className="flex items-center gap-2 bg-[#39FF14] text-black font-black uppercase tracking-widest px-6 py-3 rounded-xl hover:bg-white transition-all"
         >
           <Plus className="w-5 h-5" />
