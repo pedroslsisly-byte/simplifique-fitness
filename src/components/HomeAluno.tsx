@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { Home, Dumbbell, User, LogOut, ChevronRight, PlayCircle, Timer, Bell } from 'lucide-react';
+import { Home, Dumbbell, User, LogOut, ChevronRight, PlayCircle, Timer, Bell, ArrowLeft } from 'lucide-react';
 import ProfileTab from './ProfileTab';
 import TreinosTab from './TreinosTab';
 import AlarmesTab from './AlarmesTab';
@@ -13,16 +13,37 @@ export default function HomeAluno({ session }: { session: any }) {
   const [activeTab, setActiveTab] = useState('home');
   const [dbError, setDbError] = useState(false);
   const [cronometroOpen, setCronometroOpen] = useState(false);
+  const [treinoIniciado, setTreinoIniciado] = useState(false);
   const [treinoAtual, setTreinoAtual] = useState<any>(() => {
     const saved = localStorage.getItem('treinoAtual');
     try { return saved ? JSON.parse(saved) : null; } catch { return null; }
   });
+
+  useEffect(() => {
+    const saved = localStorage.getItem('treinoAtual');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed) setTreinoAtual(parsed);
+      } catch { }
+    }
+  }, []);
 
   const handleSetTreino = (treino: any) => {
     setTreinoAtual(treino);
     if (treino) localStorage.setItem('treinoAtual', JSON.stringify(treino));
     else localStorage.removeItem('treinoAtual');
     setActiveTab('home');
+  };
+
+  const handleVoltar = () => {
+    setTreinoAtual(null);
+    localStorage.removeItem('treinoAtual');
+    setActiveTab('treinos');
+  };
+
+  const handleEncerrarTreino = () => {
+    setTreinoIniciado(false);
   };
 
   useEffect(() => {
@@ -199,6 +220,12 @@ export default function HomeAluno({ session }: { session: any }) {
                 {treinoAtual ? (
                   <>
                     <div>
+                      {treinoIniciado && (
+                        <button onClick={handleEncerrarTreino} className="flex items-center gap-2 text-zinc-400 hover:text-white mb-4 transition-colors">
+                          <ArrowLeft className="w-4 h-4" />
+                          <span className="text-xs uppercase tracking-widest font-bold">Voltar</span>
+                        </button>
+                      )}
                       <span className="inline-block px-3 py-1 bg-white/10 text-white text-[10px] font-bold uppercase tracking-widest rounded-full mb-4">Treino do Dia</span>
                       <h3 className="text-3xl font-black italic tracking-tight uppercase mb-2">{treinoAtual.nome}</h3>
                       <p className="text-gray-400 text-sm max-w-md">
@@ -207,7 +234,7 @@ export default function HomeAluno({ session }: { session: any }) {
                     </div>
                     
                     <div className="flex flex-col gap-3 w-full md:w-auto">
-                      <button className="flex-shrink-0 flex items-center justify-center gap-2 bg-[#39FF14] text-black font-black uppercase text-sm tracking-widest py-4 px-8 rounded-xl hover:bg-white hover:text-black transition-all shadow-[0_0_20px_rgba(57,255,20,0.3)]">
+                      <button onClick={() => setTreinoIniciado(true)} className="flex-shrink-0 flex items-center justify-center gap-2 bg-[#39FF14] text-black font-black uppercase text-sm tracking-widest py-4 px-8 rounded-xl hover:bg-white hover:text-black transition-all shadow-[0_0_20px_rgba(57,255,20,0.3)]">
                         <PlayCircle className="w-5 h-5" />
                         INICIAR TREINO
                       </button>
@@ -315,6 +342,20 @@ export default function HomeAluno({ session }: { session: any }) {
             >
               Fechar
             </button>
+            <CronometroTimer />
+          </div>
+        </div>
+      )}
+
+      {treinoIniciado && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/95 backdrop-blur-md">
+          <div className="w-full max-w-2xl">
+            <div className="flex justify-between items-center mb-6">
+              <button onClick={handleEncerrarTreino} className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors">
+                <ArrowLeft className="w-4 h-4" />
+                <span className="text-xs uppercase tracking-widest font-bold">Encerrar Treino</span>
+              </button>
+            </div>
             <CronometroTimer />
           </div>
         </div>
