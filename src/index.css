@@ -25,4 +25,19 @@ body {
   outline: none; 
   border-color: #39FF14; 
   box-shadow: 0 0 10px rgba(57, 255, 20, 0.2); 
+} 
+
+/* Slashed zero for JetBrains Mono */
+.slashed-zero {
+  font-variant-numeric: slashed-zero;
+}
+/* Custom Number Input (Hide Arrows) */
+.custom-number-input::-webkit-outer-spin-button,
+.custom-number-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.custom-number-input[type=number] {
+  appearance: textfield;
+  -moz-appearance: textfield;
 }
