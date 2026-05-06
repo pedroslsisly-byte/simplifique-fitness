@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Bell, Clock, Plus, X, Trash2, Droplets, Dumbbell, Utensils, Save } from 'lucide-react';
+import { useAlarmMonitor } from '../hooks/useAlarmMonitor';
 
 interface Alarme {
   id: string;
@@ -27,6 +28,8 @@ export default function AlarmesTab() {
   const [alarmes, setAlarmes] = useState<Alarme[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [novoAlarme, setNovoAlarme] = useState({ tipo: 'agua' as const, nome: '', horario: '08:00' });
+
+  useAlarmMonitor(alarmes);
 
   useEffect(() => {
     const saved = localStorage.getItem('alarmes');
