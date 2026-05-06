@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bell, Clock, Plus, X, Trash2, Droplets, Dumbbell, Utensils, Save } from 'lucide-react';
+import { Bell, Clock, Plus, X, Trash2, Droplets, Dumbbell, Utensils, Save, Pencil } from 'lucide-react';
 import { useAlarmMonitor } from '../hooks/useAlarmMonitor';
 
 interface Alarme {
@@ -69,23 +69,51 @@ export default function AlarmesTab() {
 
   const adicionarAlarme = () => {
     if (!novoAlarme.nome || !novoAlarme.horario) return;
-    const alarme: Alarme = {
-      id: Date.now().toString(),
-      tipo: novoAlarme.tipo,
-      nome: novoAlarme.nome,
-      horario: novoAlarme.horario,
-      ativo: true,
-      diasSemana: novoAlarme.diasSemana,
-      som: novoAlarme.som,
-    };
-    salvarAlarmes([...alarmes, alarme]);
+    
+    if (isEditing) {
+      salvarAlarmes(alarmes.map(a => a.id === isEditing ? {
+        ...a,
+        tipo: novoAlarme.tipo,
+        nome: novoAlarme.nome,
+        horario: novoAlarme.horario,
+        diasSemana: novoAlarme.diasSemana,
+        som: novoAlarme.som,
+      } : a));
+    } else {
+      const alarme: Alarme = {
+        id: Date.now().toString(),
+        tipo: novoAlarme.tipo,
+        nome: novoAlarme.nome,
+        horario: novoAlarme.horario,
+        ativo: true,
+        diasSemana: novoAlarme.diasSemana,
+        som: novoAlarme.som,
+      };
+      salvarAlarmes([...alarmes, alarme]);
+    }
+    
     setIsModalOpen(false);
+    setIsEditing(null);
     setNovoAlarme({ tipo: 'agua', nome: '', horario: '08:00', diasSemana: [0,1,2,3,4,5,6], som: 'bell' });
   };
 
   const toggleAlarme = (id: string) => {
     salvarAlarmes(alarmes.map(a => a.id === id ? { ...a, ativo: !a.ativo } : a));
   };
+
+  const prepararEdicao = (alarme: Alarme) => {
+    setNovoAlarme({
+      tipo: alarme.tipo,
+      nome: alarme.nome,
+      horario: alarme.horario,
+      diasSemana: alarme.diasSemana,
+      som: alarme.som,
+    });
+    setIsModalOpen(true);
+    setIsEditing(alarme.id);
+  };
+
+  const [isEditing, setIsEditing] = useState<string | null>(null);
 
   const excluirAlarme = (id: string) => {
     salvarAlarmes(alarmes.filter(a => a.id !== id));
@@ -166,6 +194,12 @@ export default function AlarmesTab() {
                         <div className="absolute right-1 top-1 w-6 h-6 rounded-full bg-[#39FF14] transition-transform"></div>
                       </button>
                       <button
+                        onClick={() => prepararEdicao(alarme)}
+                        className="p-2 text-gray-500 hover:text-[#39FF14] transition-colors"
+                      >
+                        <Pencil className="w-5 h-5" />
+                      </button>
+                      <button
                         onClick={() => excluirAlarme(alarme.id)}
                         className="p-2 text-gray-500 hover:text-red-500 transition-colors"
                       >
@@ -205,6 +239,12 @@ export default function AlarmesTab() {
                         className="relative w-14 h-8 rounded-full bg-white/5 border border-white/10"
                       >
                         <div className="absolute left-1 top-1 w-6 h-6 rounded-full bg-gray-500 transition-transform"></div>
+                      </button>
+                      <button
+                        onClick={() => prepararEdicao(alarme)}
+                        className="p-2 text-gray-500 hover:text-[#39FF14] transition-colors"
+                      >
+                        <Pencil className="w-5 h-5" />
                       </button>
                       <button
                         onClick={() => excluirAlarme(alarme.id)}
@@ -318,7 +358,7 @@ export default function AlarmesTab() {
                 className="w-full py-4 bg-[#39FF14] text-black font-black uppercase tracking-widest rounded-xl hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 <Save className="w-5 h-5" />
-                Salvar Alarme
+                {isEditing ? 'Salvar Alterações' : 'Salvar Alarme'}
               </button>
             </div>
           </div>

@@ -129,3 +129,8 @@ USING (auth.uid() = user_id OR user_id IS NULL);
 CREATE POLICY "Usuários podem excluir alarmes" 
 ON public.alarmes FOR DELETE 
 USING (auth.uid() = user_id OR user_id IS NULL);
+
+-- Adicionar colunas para dias da semana e tipo de som
+ALTER TABLE public.alarmes 
+ADD COLUMN IF NOT EXISTS dias_semana INT[] DEFAULT '{0,1,2,3,4,5,6}',
+ADD COLUMN IF NOT EXISTS som TEXT DEFAULT 'bell';
