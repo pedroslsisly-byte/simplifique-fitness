@@ -31,18 +31,23 @@ export default function LoginScreen() {
     }
 
     try {
+      console.log('Tentando autenticação...', { email: email.trim(), isLogin });
+      
       if (isLogin) {
         const { data, error: signInError } = await supabase.auth.signInWithPassword({
           email: email.trim(),
           password,
         });
 
+        console.log('Resposta login:', { data, error: signInError });
+
         if (signInError) {
+          console.error('Erro no login:', signInError);
           if (signInError.message.includes('Invalid login credentials')) {
             throw new Error('Email ou senha incorretos. Tente novamente.');
           }
-          if (signInError.message.includes('Too many requests')) {
-            throw new Error('Muitas tentativas. Aguarde alguns segundos e tente novamente.');
+          if (signInError.message.includes('fetch')) {
+            throw new Error('Erro de conexão. Verifique sua internet.');
           }
           throw signInError;
         }
