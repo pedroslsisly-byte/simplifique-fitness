@@ -14,6 +14,7 @@ export default function HomeAluno({ session }: { session: any }) {
   const [dbError, setDbError] = useState(false);
   const [cronometroOpen, setCronometroOpen] = useState(false);
   const [treinoIniciado, setTreinoIniciado] = useState(false);
+  const [exercicioAtivo, setExercicioAtivo] = useState<any>(null);
   const [treinoAtual, setTreinoAtual] = useState<any>(() => {
     const saved = localStorage.getItem('treinoAtual');
     try { return saved ? JSON.parse(saved) : null; } catch { return null; }
@@ -291,9 +292,12 @@ export default function HomeAluno({ session }: { session: any }) {
                           {exercicio.descanso ? ` • ${exercicio.descanso}s descanso` : ''}
                         </p>
                       </div>
-                      <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-[#39FF14] group-hover:bg-[#39FF14] group-hover:text-black transition-colors">
+                      <button 
+                        onClick={() => setExercicioAtivo(exercicio)}
+                        className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-[#39FF14] group-hover:bg-[#39FF14] group-hover:text-black transition-colors"
+                      >
                         <ChevronRight className="w-5 h-5" />
-                      </div>
+                      </button>
                     </div>
                   ))
                 ) : treinos.length === 0 ? (
@@ -343,6 +347,51 @@ export default function HomeAluno({ session }: { session: any }) {
               Fechar
             </button>
             <CronometroTimer />
+          </div>
+        </div>
+      )}
+
+      {exercicioAtivo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/95 backdrop-blur-md">
+          <div className="relative w-full max-w-md">
+            <div className="glass rounded-[2.5rem] p-8 border border-white/5 shadow-2xl">
+              <header className="flex justify-between items-center mb-8">
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] uppercase tracking-widest text-[#39FF14] font-bold">EM EXECUÇÃO</span>
+                  <h3 className="text-2xl font-black italic uppercase text-white">
+                    {exercicioAtivo.nome || exercicioAtivo.name || exercicioAtivo.titulo || 'Exercício'}
+                  </h3>
+                </div>
+              </header>
+              
+              <div className="mb-8 p-4 bg-white/5 rounded-2xl">
+                <div className="flex justify-between text-center">
+                  <div className="flex-1">
+                    <span className="block text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-1">Séries</span>
+                    <span className="text-2xl font-black text-white">{exercicioAtivo.series || '3'}</span>
+                  </div>
+                  <div className="w-px bg-white/10"></div>
+                  <div className="flex-1">
+                    <span className="block text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-1">Reps</span>
+                    <span className="text-2xl font-black text-white">{exercicioAtivo.repeticoes || exercicioAtivo.reps || '10-12'}</span>
+                  </div>
+                  <div className="w-px bg-white/10"></div>
+                  <div className="flex-1">
+                    <span className="block text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-1">Descanso</span>
+                    <span className="text-2xl font-black text-white">{exercicioAtivo.descanso || '60'}s</span>
+                  </div>
+                </div>
+              </div>
+
+              <CronometroTimer />
+
+              <button 
+                onClick={() => setExercicioAtivo(null)}
+                className="w-full mt-6 py-4 bg-[#39FF14] text-black font-black uppercase text-sm tracking-widest rounded-xl hover:bg-white transition-all"
+              >
+                Concluir
+              </button>
+            </div>
           </div>
         </div>
       )}
