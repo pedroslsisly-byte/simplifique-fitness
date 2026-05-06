@@ -206,10 +206,16 @@ export default function HomeAluno({ session }: { session: any }) {
                       </p>
                     </div>
                     
-                    <button onClick={() => setCronometroOpen(true)} className="flex-shrink-0 flex items-center justify-center gap-2 bg-yellow-500 text-black font-black uppercase text-sm tracking-widest py-4 px-8 rounded-xl hover:bg-white transition-all">
-                      <Timer className="w-5 h-5" />
-                      Cronômetro
-                    </button>
+                    <div className="flex flex-col gap-3 w-full md:w-auto">
+                      <button className="flex-shrink-0 flex items-center justify-center gap-2 bg-[#39FF14] text-black font-black uppercase text-sm tracking-widest py-4 px-8 rounded-xl hover:bg-white hover:text-black transition-all shadow-[0_0_20px_rgba(57,255,20,0.3)]">
+                        <PlayCircle className="w-5 h-5" />
+                        INICIAR TREINO
+                      </button>
+                      <button onClick={() => setCronometroOpen(true)} className="flex-shrink-0 flex items-center justify-center gap-2 bg-transparent border border-zinc-700 text-zinc-400 font-bold uppercase text-xs tracking-widest py-3 px-6 rounded-xl hover:border-yellow-500 hover:text-yellow-500 transition-all">
+                        <Timer className="w-4 h-4" />
+                        Cronômetro
+                      </button>
+                    </div>
                   </>
                 ) : (
                   <>
